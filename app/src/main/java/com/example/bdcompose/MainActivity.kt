@@ -1,17 +1,39 @@
-package com.example.roomdemo
+package com.example.bdcompose
 
 import android.app.Application
 import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -27,40 +49,18 @@ import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.example.roomdemo.ui.theme.RoomDemoTheme
+import com.example.bdcompose.ui.theme.BdcomposeTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            RoomDemoTheme {
+            BdcomposeTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -68,7 +68,6 @@ class MainActivity : ComponentActivity() {
                     val viewModel: MainViewModel = viewModel(
                         factory = MainViewModelFactory(application)
                     )
-                    // читаем LiveData, чтобы проверить, что всё связано
                     val allProducts by viewModel.allProducts.observeAsState(emptyList())
                     val searchResults by viewModel.searchResults.observeAsState(emptyList())
 
@@ -82,6 +81,8 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
+// ============ UI ============
 
 @Composable
 fun MainScreen(
@@ -177,6 +178,51 @@ fun MainScreen(
             }
         }
     }
+}
+
+@Composable
+fun TitleRow(head1: String, head2: String, head3: String) {
+    Row(
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.primary)
+            .fillMaxWidth()
+            .padding(5.dp)
+    ) {
+        Text(head1, color = Color.White, modifier = Modifier.weight(0.1f))
+        Text(head2, color = Color.White, modifier = Modifier.weight(0.2f))
+        Text(head3, color = Color.White, modifier = Modifier.weight(0.2f))
+    }
+}
+
+@Composable
+fun ProductRow(id: Int, name: String, quantity: Int) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(5.dp)
+    ) {
+        Text(id.toString(), modifier = Modifier.weight(0.1f))
+        Text(name, modifier = Modifier.weight(0.2f))
+        Text(quantity.toString(), modifier = Modifier.weight(0.2f))
+    }
+}
+
+@Composable
+fun CustomTextField(
+    title: String,
+    textState: String,
+    onTextChange: (String) -> Unit,
+    keyboardType: KeyboardType
+) {
+    OutlinedTextField(
+        value = textState,
+        onValueChange = { onTextChange(it) },
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+        singleLine = true,
+        label = { Text(title) },
+        modifier = Modifier.padding(10.dp),
+        textStyle = TextStyle(fontWeight = FontWeight.Bold, fontSize = 30.sp)
+    )
 }
 
 // ============ Room: Entity ============
@@ -301,49 +347,4 @@ class MainViewModelFactory(val application: Application) :
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return MainViewModel(application) as T
     }
-}
-
-@Composable
-fun TitleRow(head1: String, head2: String, head3: String) {
-    Row(
-        modifier = Modifier
-            .background(MaterialTheme.colorScheme.primary)
-            .fillMaxWidth()
-            .padding(5.dp)
-    ) {
-        Text(head1, color = Color.White, modifier = Modifier.weight(0.1f))
-        Text(head2, color = Color.White, modifier = Modifier.weight(0.2f))
-        Text(head3, color = Color.White, modifier = Modifier.weight(0.2f))
-    }
-}
-
-@Composable
-fun ProductRow(id: Int, name: String, quantity: Int) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(5.dp)
-    ) {
-        Text(id.toString(), modifier = Modifier.weight(0.1f))
-        Text(name, modifier = Modifier.weight(0.2f))
-        Text(quantity.toString(), modifier = Modifier.weight(0.2f))
-    }
-}
-
-@Composable
-fun CustomTextField(
-    title: String,
-    textState: String,
-    onTextChange: (String) -> Unit,
-    keyboardType: KeyboardType
-) {
-    OutlinedTextField(
-        value = textState,
-        onValueChange = { onTextChange(it) },
-        keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-        singleLine = true,
-        label = { Text(title) },
-        modifier = Modifier.padding(10.dp),
-        textStyle = TextStyle(fontWeight = FontWeight.Bold, fontSize = 30.sp)
-    )
 }
